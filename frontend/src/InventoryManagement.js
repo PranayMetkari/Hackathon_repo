@@ -26,12 +26,16 @@ function InventoryManagement() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  // Fetch inventory from Firestore
+  // Fetch inventory for current supplier from Firestore
   useEffect(() => {
     const fetchInventory = async () => {
       try {
+        const email = localStorage.getItem('userEmail');
+        if (!email) return;
         const snapshot = await getDocs(collection(db, 'inventory'));
-        const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const items = snapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .filter(item => item.supplierEmail === email);
         setInventory(items);
       } catch (error) {
         console.error('Error fetching inventory:', error);
@@ -50,15 +54,18 @@ function InventoryManagement() {
     if (!item || !quantity || !price) return;
 
     try {
+      const email = localStorage.getItem('userEmail');
+      if (!email) return;
       const docRef = await addDoc(collection(db, 'inventory'), {
         name: item,
         quantity: Number(quantity),
         price: Number(price),
+        supplierEmail: email
       });
 
       setInventory(prev => [
         ...prev,
-        { id: docRef.id, name: item, quantity: Number(quantity), price: Number(price) },
+        { id: docRef.id, name: item, quantity: Number(quantity), price: Number(price), supplierEmail: email },
       ]);
 
       setItem('');

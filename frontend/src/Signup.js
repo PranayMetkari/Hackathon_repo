@@ -1,5 +1,7 @@
 // src/Signup.js
 import React, { useState } from 'react';
+import { db } from './firebase';
+import { doc, setDoc } from 'firebase/firestore';
 import { auth } from './firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
@@ -56,6 +58,17 @@ function Signup() {
 
     try {
       await createUserWithEmailAndPassword(auth, email, password);
+
+      // Add supplier info to Firestore
+      const supplierRef = doc(db, 'suppliers', email);
+      await setDoc(supplierRef, {
+        username,
+        phone,
+        email,
+        role: 'supplier',
+        createdAt: new Date().toISOString()
+      });
+
       setMsg('✅ Signup successful! Redirecting to login...');
       setTimeout(() => navigate('/login'), 1500); // Redirect after 1.5s
     } catch (error) {

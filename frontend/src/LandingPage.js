@@ -2,12 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
-import './LandingPage.css'; // 👈 Add this
+import './LandingPage.css';
 import { Avatar, IconButton, Menu, MenuItem } from '@mui/material';
 
 function LandingPage() {
 
-   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userEmail, setUserEmail] = useState(localStorage.getItem('userEmail'));
   const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
@@ -45,12 +45,12 @@ function LandingPage() {
   return (
     <div className="landing-container">
       {/* Navbar */}
-    <header className="navbar">
+      <header className="navbar">
         <div className="logo">Vendors Seva</div>
         <nav className="nav-links">
           <a href="#features">Features</a>
           <a href="#about">About</a>
-          <a href="/supplier-dashboard">Dashboard</a>
+          <a href="#contact">Contact</a>
 
           {!isLoggedIn ? (
             <>
