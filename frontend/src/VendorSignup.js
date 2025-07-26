@@ -1,3 +1,5 @@
+
+
 // VendorSignup.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -17,6 +19,8 @@ import {
   ListItemText
 } from '@mui/material';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import { db } from './firebase'; // Adjust path based on your folder structure
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const produceOptions = [
   'Potato (आलू)',
@@ -79,48 +83,65 @@ function VendorSignup() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setMsg('');
     setError('');
-    // Edge case validation
-    if (!username.trim() || !businessName.trim() || !email.trim() || !whatsapp.trim() || !location.trim() || lookingFor.length === 0) {
+
+    if (
+      !username.trim() || !businessName.trim() || !email.trim() ||
+      !whatsapp.trim() || !location.trim() || lookingFor.length === 0
+    ) {
       setError('All fields are required.');
       return;
     }
-    // Username validation
+
     if (username.length < 3 || username.length > 30) {
       setError('Username must be between 3 and 30 characters.');
       return;
     }
-    // Business name validation
+
     if (businessName.length < 2 || businessName.length > 50) {
       setError('Business name must be between 2 and 50 characters.');
       return;
     }
-    // Email validation
+
     if (!/^([a-zA-Z0-9_\-.]+)@([a-zA-Z0-9_\-.]+)\.([a-zA-Z]{2,5})$/.test(email)) {
       setError('Please enter a valid email address.');
       return;
     }
-    // WhatsApp number validation
+
     if (!/^\d{10}$/.test(whatsapp)) {
       setError('WhatsApp number must be exactly 10 digits.');
       return;
     }
-    // Location validation
+
     if (location.length < 3 || location.length > 100) {
       setError('Location must be between 3 and 100 characters.');
       return;
     }
-    // LookingFor validation
-    if (lookingFor.length === 0) {
-      setError('Please select at least one item you are looking for.');
-      return;
+
+    try {
+      await addDoc(collection(db, 'vendors_list'), {
+        username,
+        businessName,
+        email,
+        whatsapp,
+        location,
+        lookingFor,
+        createdAt: serverTimestamp()
+      });
+      setMsg('Thanks for registering! Your info has been saved.');
+      setUsername('');
+      setBusinessName('');
+      setEmail('');
+      setWhatsapp('');
+      setLocation('');
+      setLookingFor([]);
+    } catch (err) {
+      setError('Failed to submit data. Please try again.');
+      console.error(err);
     }
-    // Here you would send data to your backend or Firebase
-    setMsg('Thanks for registering! Please tap into WhatsApp to continue.');
-    setError('');
   };
 
   return (
@@ -192,7 +213,7 @@ function VendorSignup() {
               >
                 {produceOptions.map((option) => (
                   <MenuItem key={option} value={option}>
-                    <Checkbox checked={lookingFor.indexOf(option) > -1} />
+                    <Checkbox checked={lookingFor.includes(option)} />
                     <ListItemText primary={option} />
                   </MenuItem>
                 ))}
