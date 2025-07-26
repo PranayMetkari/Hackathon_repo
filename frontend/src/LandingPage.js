@@ -3,19 +3,24 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import './LandingPage.css'; // 👈 Add this
+import { Avatar, IconButton, Menu, MenuItem } from '@mui/material';
 
 function LandingPage() {
 
    const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userEmail, setUserEmail] = useState(localStorage.getItem('userEmail'));
+  const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const email = localStorage.getItem('userEmail');
     setIsLoggedIn(email !== null);
+    setUserEmail(email);
 
     const handleStorageChange = () => {
       const updatedEmail = localStorage.getItem('userEmail');
       setIsLoggedIn(updatedEmail !== null);
+      setUserEmail(updatedEmail);
     };
 
     window.addEventListener('storage', handleStorageChange);
@@ -25,7 +30,16 @@ function LandingPage() {
   const handleLogout = () => {
     localStorage.removeItem('userEmail');
     setIsLoggedIn(false);
+    setUserEmail(null);
+    setAnchorEl(null);
     navigate('/login');
+  };
+
+  const handleMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
   };
 
   return (
@@ -45,8 +59,20 @@ function LandingPage() {
             </>
           ) : (
             <>
-              <Link to="/supplier-dashboard">Dashboard</Link>
-              <button onClick={handleLogout} className="register-btn">Logout</button>
+              <IconButton onClick={handleMenu} color="inherit" sx={{ p: 0, ml: 1 }}>
+                <Avatar sx={{ bgcolor: '#1976d2', width: 32, height: 32 }}>
+                  {userEmail ? userEmail.charAt(0).toUpperCase() : ''}
+                </Avatar>
+              </IconButton>
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleClose}
+              >
+                <MenuItem disabled>{userEmail}</MenuItem>
+                <MenuItem onClick={() => { navigate('/supplier-dashboard'); handleClose(); }}>Dashboard</MenuItem>
+                <MenuItem onClick={handleLogout}>Logout</MenuItem>
+              </Menu>
             </>
           )}
         </nav>
@@ -57,7 +83,7 @@ function LandingPage() {
         <div className="hero-content">
           <h1>Join the Supplier Network</h1>
           <p>Connect with thousands of street food vendors and grow your business through our verified platform.</p>
-          <Link to="/signup" className="cta-btn">Get Started</Link>
+          <Link to={isLoggedIn ? "/supplier-dashboard" : "/signup"} className="cta-btn">Get Started</Link>
         </div>
       </section>
 

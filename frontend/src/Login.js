@@ -27,6 +27,7 @@ function Login() {
       await signInWithEmailAndPassword(auth, email, password);
       setMsg('✅ Logged in successfully!');
       setError('');
+      localStorage.setItem('userEmail', email); // Store email for profile
       setTimeout(() => {
         navigate('/');
       }, 1000);
