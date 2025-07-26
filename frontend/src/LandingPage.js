@@ -1,20 +1,54 @@
 // LandingPage.js
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './LandingPage.css'; // 👈 Add this
 
 function LandingPage() {
+
+   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const email = localStorage.getItem('userEmail');
+    setIsLoggedIn(email !== null);
+
+    const handleStorageChange = () => {
+      const updatedEmail = localStorage.getItem('userEmail');
+      setIsLoggedIn(updatedEmail !== null);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('userEmail');
+    setIsLoggedIn(false);
+    navigate('/login');
+  };
+
   return (
     <div className="landing-container">
       {/* Navbar */}
-      <header className="navbar">
+    <header className="navbar">
         <div className="logo">Vendors Seva</div>
         <nav className="nav-links">
           <a href="#features">Features</a>
           <a href="#about">About</a>
-          <a href="#contact">Contact</a>
-          <Link to="/login">Login</Link>
-          <Link to="/signup" className="register-btn">Register</Link>
+          <a href="/supplier-dashboard">Dashboard</a>
+
+          {!isLoggedIn ? (
+            <>
+              <Link to="/login">Login</Link>
+              <Link to="/signup" className="register-btn">Register</Link>
+            </>
+          ) : (
+            <>
+              <Link to="/supplier-dashboard">Dashboard</Link>
+              <button onClick={handleLogout} className="register-btn">Logout</button>
+            </>
+          )}
         </nav>
       </header>
 
@@ -81,3 +115,5 @@ function LandingPage() {
 }
 
 export default LandingPage;
+
+

@@ -2,6 +2,8 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Signup from './Signup'; 
 import Login from './Login';   
+import LandingPage from './LandingPage';
+import SupplierDashboard from './SupplierDashboard';
 
 function App() {
   return (
