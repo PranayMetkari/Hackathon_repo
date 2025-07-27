@@ -9,13 +9,21 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { db } from './firebase';
 import {
-  collection, addDoc, getDocs, deleteDoc, doc
+  collection, addDoc, getDocs, deleteDoc, doc, setDoc
 } from 'firebase/firestore';
 
 const mockMarketRate = 30;
 const suggestedPrice = mockMarketRate - 2;
 
 function InventoryManagement() {
+  // Load or initialize itemIdMap from localStorage
+  const initialMap = JSON.parse(localStorage.getItem('itemIdMap') || '{}');
+  const [itemIdMap, setItemIdMap] = useState({
+    potato: 1,
+    tomato: 2,
+    onion: 3,
+    ...initialMap
+  });
   const [file, setFile] = useState(null);
   const [uploadMsg, setUploadMsg] = useState('');
   const [item, setItem] = useState('');
@@ -55,17 +63,33 @@ function InventoryManagement() {
     try {
       const email = localStorage.getItem('userEmail');
       if (!email) return;
-      const supplierInventoryRef = collection(db, 'suppliers', email, 'inventory');
-      const docRef = await addDoc(supplierInventoryRef, {
+      const itemKey = item.trim().toLowerCase();
+      let itemId = itemIdMap[itemKey];
+      // If itemId does not exist, assign next available id
+      if (!itemId) {
+        const usedIds = Object.values(itemIdMap);
+        const nextId = usedIds.length > 0 ? Math.max(...usedIds) + 1 : 1;
+        itemId = nextId;
+        const newMap = { ...itemIdMap, [itemKey]: itemId };
+        setItemIdMap(newMap);
+        localStorage.setItem('itemIdMap', JSON.stringify(newMap));
+      }
+      const itemDocRef = doc(db, 'suppliers', email, 'inventory', itemId.toString());
+      await setDoc(itemDocRef, {
         name: item,
+        itemId,
         quantity: Number(quantity),
         price: Number(price)
       });
 
-      setInventory(prev => [
-        ...prev,
-        { id: docRef.id, name: item, quantity: Number(quantity), price: Number(price) },
-      ]);
+      setInventory(prev => {
+        // Remove any previous item with same itemId
+        const filtered = prev.filter(row => row.itemId !== itemId);
+        return [
+          ...filtered,
+          { id: itemId.toString(), name: item, itemId, quantity: Number(quantity), price: Number(price) }
+        ];
+      });
 
       setItem('');
       setQuantity('');

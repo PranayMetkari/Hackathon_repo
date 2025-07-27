@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { db } from './firebase';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth } from './firebase';
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
@@ -30,7 +28,6 @@ function Login() {
       setMsg('✅ Logged in successfully!');
       setError('');
       localStorage.setItem('userEmail', email); // Store email for profile
-
       setTimeout(() => {
         navigate('/');
       }, 1000);
