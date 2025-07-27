@@ -32,10 +32,9 @@ function InventoryManagement() {
       try {
         const email = localStorage.getItem('userEmail');
         if (!email) return;
-        const snapshot = await getDocs(collection(db, 'inventory'));
-        const items = snapshot.docs
-          .map(doc => ({ id: doc.id, ...doc.data() }))
-          .filter(item => item.supplierEmail === email);
+        const supplierInventoryRef = collection(db, 'suppliers', email, 'inventory');
+        const snapshot = await getDocs(supplierInventoryRef);
+        const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setInventory(items);
       } catch (error) {
         console.error('Error fetching inventory:', error);
@@ -56,16 +55,16 @@ function InventoryManagement() {
     try {
       const email = localStorage.getItem('userEmail');
       if (!email) return;
-      const docRef = await addDoc(collection(db, 'inventory'), {
+      const supplierInventoryRef = collection(db, 'suppliers', email, 'inventory');
+      const docRef = await addDoc(supplierInventoryRef, {
         name: item,
         quantity: Number(quantity),
-        price: Number(price),
-        supplierEmail: email
+        price: Number(price)
       });
 
       setInventory(prev => [
         ...prev,
-        { id: docRef.id, name: item, quantity: Number(quantity), price: Number(price), supplierEmail: email },
+        { id: docRef.id, name: item, quantity: Number(quantity), price: Number(price) },
       ]);
 
       setItem('');
@@ -78,7 +77,9 @@ function InventoryManagement() {
 
   const handleDelete = async (id) => {
     try {
-      await deleteDoc(doc(db, 'inventory', id));
+      const email = localStorage.getItem('userEmail');
+      if (!email) return;
+      await deleteDoc(doc(db, 'suppliers', email, 'inventory', id));
       setInventory(inventory.filter(row => row.id !== id));
     } catch (error) {
       console.error('Error deleting item:', error);

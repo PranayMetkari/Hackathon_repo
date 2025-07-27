@@ -98,7 +98,11 @@ function SupplierDashboard() {
           </Typography>
           {/* Profile/Notifications: show username if available */}
           <Typography variant="body1" sx={{ color: '#333' }}>
-            {supplier ? `Welcome, ${supplier.username}` : 'Profile'}
+            {supplier
+              ? supplier.username
+                ? `Welcome, ${supplier.username}`
+                : supplier.email
+              : 'Profile'}
           </Typography>
         </Toolbar>
       </AppBar>

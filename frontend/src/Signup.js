@@ -71,12 +71,11 @@ function Signup() {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
 
-      // Add supplier info to Firestore with phone as primary key and +91 prefix
-      const phoneKey = `91${phone}`;
-      const supplierRef = doc(db, 'suppliers', phoneKey);
+      // Add supplier info to Firestore with email as key
+      const supplierRef = doc(db, 'suppliers', email);
       await setDoc(supplierRef, {
         username,
-        phone: phoneKey,
+        phone,
         email,
         district,
         role: 'supplier',
