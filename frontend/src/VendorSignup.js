@@ -1,5 +1,3 @@
-
-
 // VendorSignup.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -71,7 +69,22 @@ const produceOptions = [
   'Lotus Stem (कमल ककड़ी)',
   'Other (अन्य)'
 ];
-
+function sendWelcomeMessage(wa_id) {
+  fetch("https://hackathonbot.pythonanywhere.com/sendmessage", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ wa_id }) // sending { wa_id: "91xxxxxxxxxx" }
+  })
+    .then(response => response.json())
+    .then(data => {
+      console.log("Message sent successfully:", data);
+    })
+    .catch(error => {
+      console.error("Error sending message:", error);
+    });
+}
 function VendorSignup() {
   const [username, setUsername] = useState('');
   const [businessName, setBusinessName] = useState('');
@@ -138,6 +151,7 @@ function VendorSignup() {
       setWhatsapp('');
       setLocation('');
       setLookingFor([]);
+      sendWelcomeMessage(("91"+ whatsapp));
     } catch (err) {
       setError('Failed to submit data. Please try again.');
       console.error(err);
