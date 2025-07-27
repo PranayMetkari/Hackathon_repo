@@ -1,11 +1,9 @@
-// src/Signup.js
 import React, { useState } from 'react';
 import { db } from './firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth } from './firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-
 import {
   Box,
   Paper,
@@ -13,14 +11,28 @@ import {
   TextField,
   Button,
   Alert,
-  Avatar
+  Avatar,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+
+// List of all districts in Maharashtra
+const districtOptions = [
+  'Ahmednagar', 'Akola', 'Amravati', 'Aurangabad', 'Beed', 'Bhandara', 'Buldhana', 'Chandrapur',
+  'Dhule', 'Gadchiroli', 'Gondia', 'Hingoli', 'Jalgaon', 'Jalna', 'Kolhapur', 'Latur', 'Mumbai City',
+  'Mumbai Suburban', 'Nagpur', 'Nanded', 'Nandurbar', 'Nashik', 'Osmanabad', 'Palghar', 'Parbhani',
+  'Pune', 'Raigad', 'Ratnagiri', 'Sangli', 'Satara', 'Sindhudurg', 'Solapur', 'Thane', 'Wardha',
+  'Washim', 'Yavatmal'
+];
 
 function Signup() {
   const [username, setUsername] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
+  const [district, setDistrict] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [msg, setMsg] = useState('');
@@ -36,7 +48,7 @@ function Signup() {
     setError('');
 
     // Validations
-    if (!username || !phone || !email || !password || !confirmPassword) {
+    if (!username || !phone || !email || !district || !password || !confirmPassword) {
       setError('All fields are required.');
       return;
     }
@@ -59,12 +71,14 @@ function Signup() {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
 
-      // Add supplier info to Firestore
-      const supplierRef = doc(db, 'suppliers', email);
+      // Add supplier info to Firestore with phone as primary key and +91 prefix
+      const phoneKey = `91${phone}`;
+      const supplierRef = doc(db, 'suppliers', phoneKey);
       await setDoc(supplierRef, {
         username,
-        phone,
+        phone: phoneKey,
         email,
+        district,
         role: 'supplier',
         createdAt: new Date().toISOString()
       });
@@ -77,6 +91,7 @@ function Signup() {
   };
 
   return (
+    
     <Box
       display="flex"
       justifyContent="center"
@@ -110,6 +125,20 @@ function Signup() {
               onChange={(e) => setPhone(e.target.value)}
               required
             />
+            <FormControl fullWidth margin="normal">
+              <InputLabel>District</InputLabel>
+              <Select
+                value={district}
+                onChange={(e) => setDistrict(e.target.value)}
+                label="District"
+                required
+              >
+                {districtOptions.map((d) => (
+                  <MenuItem key={d} value={d}>{d}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
             <TextField
               label="Email"
               type="email"
