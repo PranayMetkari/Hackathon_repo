@@ -1,4 +1,4 @@
-// List of all districts in Maharashtra
+
 
 // VendorSignup.js
 import React, { useState } from 'react';
@@ -20,14 +20,8 @@ import {
 } from '@mui/material';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { db } from './firebase'; // Adjust path based on your folder structure
-import { collection, addDoc, serverTimestamp, doc, setDoc } from 'firebase/firestore';
-const districtOptions = [
-  'Ahmednagar', 'Akola', 'Amravati', 'Aurangabad', 'Beed', 'Bhandara', 'Buldhana', 'Chandrapur',
-  'Dhule', 'Gadchiroli', 'Gondia', 'Hingoli', 'Jalgaon', 'Jalna', 'Kolhapur', 'Latur', 'Mumbai City',
-  'Mumbai Suburban', 'Nagpur', 'Nanded', 'Nandurbar', 'Nashik', 'Osmanabad', 'Palghar', 'Parbhani',
-  'Pune', 'Raigad', 'Ratnagiri', 'Sangli', 'Satara', 'Sindhudurg', 'Solapur', 'Thane', 'Wardha',
-  'Washim', 'Yavatmal'
-];
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+
 const produceOptions = [
   'Potato (आलू)',
   'Tomato (टमाटर)',
@@ -77,28 +71,12 @@ const produceOptions = [
   'Lotus Stem (कमल ककड़ी)',
   'Other (अन्य)'
 ];
-function sendWelcomeMessage(wa_id) {
-  fetch("https://hackathonbot.pythonanywhere.com/sendmessage", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ wa_id }) // sending { wa_id: "91xxxxxxxxxx" }
-  })
-    .then(response => response.json())
-    .then(data => {
-      console.log("Message sent successfully:", data);
-    })
-    .catch(error => {
-      console.error("Error sending message:", error);
-    });
-}
+
 function VendorSignup() {
   const [username, setUsername] = useState('');
   const [businessName, setBusinessName] = useState('');
   const [email, setEmail] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
-  const [district, setDistrict] = useState('');
   const [location, setLocation] = useState('');
   const [lookingFor, setLookingFor] = useState([]);
   const [msg, setMsg] = useState('');
@@ -112,7 +90,7 @@ function VendorSignup() {
 
     if (
       !username.trim() || !businessName.trim() || !email.trim() ||
-      !whatsapp.trim() || !district.trim() || !location.trim() || lookingFor.length === 0
+      !whatsapp.trim() || !location.trim() || lookingFor.length === 0
     ) {
       setError('All fields are required.');
       return;
@@ -144,14 +122,11 @@ function VendorSignup() {
     }
 
     try {
-      const whatsappKey = `91${whatsapp}`;
-      const vendorRef = doc(db, 'vendors_list', whatsappKey);
-      await setDoc(vendorRef, {
+      await addDoc(collection(db, 'vendors_list'), {
         username,
         businessName,
         email,
-        whatsapp: whatsappKey,
-        district,
+        whatsapp,
         location,
         lookingFor,
         createdAt: serverTimestamp()
@@ -163,7 +138,6 @@ function VendorSignup() {
       setWhatsapp('');
       setLocation('');
       setLookingFor([]);
-      sendWelcomeMessage(("91"+ whatsapp));
     } catch (err) {
       setError('Failed to submit data. Please try again.');
       console.error(err);
@@ -219,19 +193,6 @@ function VendorSignup() {
               onChange={(e) => setWhatsapp(e.target.value)}
               required
             />
-            <FormControl fullWidth margin="normal">
-              <InputLabel>District (जिला)</InputLabel>
-              <Select
-                value={district}
-                onChange={(e) => setDistrict(e.target.value)}
-                label="District (जिला)"
-                required
-              >
-                {districtOptions.map((d) => (
-                  <MenuItem key={d} value={d}>{d}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
             <TextField
               label="Delivery of Supplies Location (सामग्री की डिलीवरी का स्थान)"
               placeholder="Enter delivery location (सामग्री की डिलीवरी का स्थान)"
