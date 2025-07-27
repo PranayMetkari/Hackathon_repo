@@ -20,12 +20,20 @@ import {
 } from '@mui/material';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { db } from './firebase'; // Adjust path based on your folder structure
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-
+import { collection, addDoc, serverTimestamp, doc, setDoc } from 'firebase/firestore';
+const districtOptions = [
+  'Ahmednagar', 'Akola', 'Amravati', 'Aurangabad', 'Beed', 'Bhandara', 'Buldhana', 'Chandrapur',
+  'Dhule', 'Gadchiroli', 'Gondia', 'Hingoli', 'Jalgaon', 'Jalna', 'Kolhapur', 'Latur', 'Mumbai City',
+  'Mumbai Suburban', 'Nagpur', 'Nanded', 'Nandurbar', 'Nashik', 'Osmanabad', 'Palghar', 'Parbhani',
+  'Pune', 'Raigad', 'Ratnagiri', 'Sangli', 'Satara', 'Sindhudurg', 'Solapur', 'Thane', 'Wardha',
+  'Washim', 'Yavatmal'
+];
 const produceOptions = [
   'Potato (आलू)',
   'Tomato (टमाटर)',
   'Onion (प्याज)',
+  'Mint (पुदीना)',
+  'Garlic (लहसुन)',
   'Spinach (पालक)',
   'Fenugreek (मेथी)',
   'Cabbage (पत्ता गोभी)',
@@ -43,10 +51,8 @@ const produceOptions = [
   'Brinjal (Eggplant) (बैंगन)',
   'Capsicum (शिमला मिर्च)',
   'Chilli (मिर्च)',
-  'Garlic (लहसुन)',
   'Ginger (अदरक)',
   'Coriander (धनिया)',
-  'Mint (पुदीना)',
   'Cucumber (खीरा)',
   'Sweet Corn (मक्का)',
   'Turnip (शलगम)',
@@ -122,13 +128,15 @@ function VendorSignup() {
     }
 
     try {
-      await addDoc(collection(db, 'vendors_list'), {
+      const whatsappKey = `91${whatsapp}`;
+      const vendorRef = doc(db, 'vendors_list', whatsappKey);
+      await setDoc(vendorRef, {
         username,
         businessName,
         email,
         whatsapp,
         location,
-        lookingFor,
+        lookingFor: lookingForIds,
         createdAt: serverTimestamp()
       });
       setMsg('Thanks for registering! Your info has been saved.');

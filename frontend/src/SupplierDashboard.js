@@ -133,7 +133,7 @@ function SupplierDashboard() {
         </Grid>
         <Box ref={footerRef} sx={{ mt: 4, textAlign: 'center', color: '#333' }}>
           <Divider sx={{ mb: 2 }} />
-          <Typography variant="body2">Branding | © 2024 | Links</Typography>
+          <Typography variant="body2">Bitlords Team | © 2025  </Typography>
         </Box>
       </Box>
     </Box>
