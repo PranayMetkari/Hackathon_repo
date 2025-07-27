@@ -84,6 +84,7 @@ function VendorSignup() {
   const [email, setEmail] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
   const [location, setLocation] = useState('');
+  const [district, setDistrict] = useState('');
   const [lookingFor, setLookingFor] = useState([]);
   const [msg, setMsg] = useState('');
   const [error, setError] = useState('');
@@ -96,7 +97,7 @@ function VendorSignup() {
 
     if (
       !username.trim() || !businessName.trim() || !email.trim() ||
-      !whatsapp.trim() || !location.trim() || lookingFor.length === 0
+      !whatsapp.trim() || !location.trim() || !district.trim() || lookingFor.length === 0
     ) {
       setError('All fields are required.');
       return;
@@ -127,6 +128,29 @@ function VendorSignup() {
       return;
     }
 
+    // Fixed IDs for common vegetables
+    const fixedProduceIdMap = {
+      'Potato (आलू)': 1,
+      'Tomato (टमाटर)': 2,
+      'Onion (प्याज)': 3,
+      'Mint (पुदीना)': 4,
+      'Garlic (लहसुन)': 5
+    };
+    // Start auto-increment from 6 for new vegetables
+    let nextId = 6;
+    const dynamicProduceIdMap = {};
+    // Assign IDs to selected vegetables
+    const lookingForIds = lookingFor.map(item => {
+      if (fixedProduceIdMap[item]) {
+        return fixedProduceIdMap[item];
+      } else {
+        if (!dynamicProduceIdMap[item]) {
+          dynamicProduceIdMap[item] = nextId++;
+        }
+        return dynamicProduceIdMap[item];
+      }
+    });
+
     try {
       const whatsappKey = `91${whatsapp}`;
       const vendorRef = doc(db, 'vendors_list', whatsappKey);
@@ -134,7 +158,8 @@ function VendorSignup() {
         username,
         businessName,
         email,
-        whatsapp,
+        whatsapp: whatsappKey,
+        district,
         location,
         lookingFor: lookingForIds,
         createdAt: serverTimestamp()
@@ -145,6 +170,7 @@ function VendorSignup() {
       setEmail('');
       setWhatsapp('');
       setLocation('');
+      setDistrict('');
       setLookingFor([]);
     } catch (err) {
       setError('Failed to submit data. Please try again.');
@@ -210,6 +236,18 @@ function VendorSignup() {
               onChange={(e) => setLocation(e.target.value)}
               required
             />
+            <FormControl fullWidth margin="normal">
+              <InputLabel>District</InputLabel>
+              <Select
+                value={district}
+                onChange={(e) => setDistrict(e.target.value)}
+                label="District"
+              >
+                {districtOptions.map((option) => (
+                  <MenuItem key={option} value={option}>{option}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
             <FormControl fullWidth margin="normal">
               <InputLabel>Looking For</InputLabel>
               <Select

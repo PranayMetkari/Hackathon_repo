@@ -32,7 +32,7 @@ function LandingPage() {
     setIsLoggedIn(false);
     setUserEmail(null);
     setAnchorEl(null);
-    navigate('/login');
+    navigate('/');
   };
 
   const handleMenu = (event) => {
