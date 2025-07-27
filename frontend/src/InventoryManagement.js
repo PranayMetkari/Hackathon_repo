@@ -7,10 +7,8 @@ import {
 } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { collection, getDocs, deleteDoc, doc, setDoc } from 'firebase/firestore';
 import { db } from './firebase';
-import {
-  collection, addDoc, getDocs, deleteDoc, doc, setDoc
-} from 'firebase/firestore';
 
 const mockMarketRate = 30;
 const suggestedPrice = mockMarketRate - 2;
@@ -74,10 +72,26 @@ function InventoryManagement() {
         setItemIdMap(newMap);
         localStorage.setItem('itemIdMap', JSON.stringify(newMap));
       }
+      // Add to supplier's inventory
       const itemDocRef = doc(db, 'suppliers', email, 'inventory', itemId.toString());
       await setDoc(itemDocRef, {
         name: item,
         itemId,
+        quantity: Number(quantity),
+        price: Number(price)
+      });
+
+      // Add/update global items collection
+      const globalItemRef = doc(db, 'items', itemId.toString());
+      await setDoc(globalItemRef, {
+        name: item,
+        itemId
+      }, { merge: true });
+
+      // Add supplier to item's suppliers subcollection
+      const supplierSubRef = doc(db, 'items', itemId.toString(), 'suppliers', email);
+      await setDoc(supplierSubRef, {
+        email,
         quantity: Number(quantity),
         price: Number(price)
       });

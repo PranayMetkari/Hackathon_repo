@@ -1,5 +1,7 @@
-import React, { useRef } from 'react';
-import { Box, CssBaseline, AppBar, Toolbar, Typography, Drawer, List, ListItem, ListItemIcon, ListItemText, Divider, IconButton, Grid, Card, CardContent } from '@mui/material';
+import React, { useRef, useEffect, useState } from 'react';
+import { db } from './firebase';
+import { doc, getDoc } from 'firebase/firestore';
+import { Box, CssBaseline, AppBar, Toolbar, Typography, Drawer, List, ListItem, ListItemIcon, ListItemText, Divider, IconButton, Grid } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import Inventory2Icon from '@mui/icons-material/Inventory2';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
@@ -14,6 +16,7 @@ const drawerWidth = 220;
 
 function SupplierDashboard() {
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [supplier, setSupplier] = useState(null);
 
   // Section refs for scrolling
   const inventoryRef = useRef(null);
@@ -32,6 +35,20 @@ function SupplierDashboard() {
     if (section === 'performance' && performanceRef.current) performanceRef.current.scrollIntoView({ behavior: 'smooth' });
     if (section === 'settings' && footerRef.current) footerRef.current.scrollIntoView({ behavior: 'smooth' });
   };
+
+  // Fetch supplier info on mount
+  useEffect(() => {
+    const fetchSupplier = async () => {
+      const email = localStorage.getItem('userEmail');
+      if (!email) return;
+      const supplierRef = doc(db, 'suppliers', email);
+      const supplierSnap = await getDoc(supplierRef);
+      if (supplierSnap.exists()) {
+        setSupplier(supplierSnap.data());
+      }
+    };
+    fetchSupplier();
+  }, []);
 
   const drawer = (
     <div>
@@ -79,8 +96,14 @@ function SupplierDashboard() {
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             Supplier Dashboard
           </Typography>
-          {/* Profile/Notifications placeholder */}
-          <Typography variant="body1" sx={{ color: '#333' }}>Profile | Notifications</Typography>
+          {/* Profile/Notifications: show username if available */}
+          <Typography variant="body1" sx={{ color: '#333' }}>
+            {supplier
+              ? supplier.username
+                ? `Welcome, ${supplier.username}`
+                : supplier.email
+              : 'Profile'}
+          </Typography>
         </Toolbar>
       </AppBar>
       <Box
@@ -133,7 +156,7 @@ function SupplierDashboard() {
         </Grid>
         <Box ref={footerRef} sx={{ mt: 4, textAlign: 'center', color: '#333' }}>
           <Divider sx={{ mb: 2 }} />
-          <Typography variant="body2">Bitlords Team | © 2025  </Typography>
+          <Typography variant="body2">Branding | © 2024 | Links</Typography>
         </Box>
       </Box>
     </Box>
