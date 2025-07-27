@@ -28,10 +28,20 @@ const districtOptions = [
   'Pune', 'Raigad', 'Ratnagiri', 'Sangli', 'Satara', 'Sindhudurg', 'Solapur', 'Thane', 'Wardha',
   'Washim', 'Yavatmal'
 ];
+// Vegetable ID mapping
+const produceIdMap = {
+  'Potato (आलू)': 1,
+  'Tomato (टमाटर)': 2,
+  'Onion (प्याज)': 3,
+  'Mint (पुदीना)': 4,
+  'Garlic (लहसुन)': 5
+};
 const produceOptions = [
   'Potato (आलू)',
   'Tomato (टमाटर)',
   'Onion (प्याज)',
+  'Mint (पुदीना)',
+  'Garlic (लहसुन)',
   'Spinach (पालक)',
   'Fenugreek (मेथी)',
   'Cabbage (पत्ता गोभी)',
@@ -49,10 +59,8 @@ const produceOptions = [
   'Brinjal (Eggplant) (बैंगन)',
   'Capsicum (शिमला मिर्च)',
   'Chilli (मिर्च)',
-  'Garlic (लहसुन)',
   'Ginger (अदरक)',
   'Coriander (धनिया)',
-  'Mint (पुदीना)',
   'Cucumber (खीरा)',
   'Sweet Corn (मक्का)',
   'Turnip (शलगम)',
@@ -146,6 +154,19 @@ function VendorSignup() {
     try {
       const whatsappKey = `91${whatsapp}`;
       const vendorRef = doc(db, 'vendors_list', whatsappKey);
+      // Assign fixed IDs for common vegetables, auto-increment for new ones
+      let nextId = 6;
+      const lookingForIds = lookingFor.map(item => {
+        if (produceIdMap[item]) {
+          return produceIdMap[item];
+        } else {
+          // Assign new ID if not in map
+          if (!produceIdMap[item]) {
+            produceIdMap[item] = nextId++;
+          }
+          return produceIdMap[item];
+        }
+      });
       await setDoc(vendorRef, {
         username,
         businessName,
@@ -153,7 +174,7 @@ function VendorSignup() {
         whatsapp: whatsappKey,
         district,
         location,
-        lookingFor,
+        lookingFor: lookingForIds,
         createdAt: serverTimestamp()
       });
       setMsg('Thanks for registering! Your info has been saved.');
